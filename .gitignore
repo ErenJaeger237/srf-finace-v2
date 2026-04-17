@@ -1,0 +1,23 @@
+# Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.pyc
+*.lock
+
+# Backend
+node_modules/
+dist/
+.env*
+!backend/.env.example
+prisma/migrations/
+.prisma/
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.tmp

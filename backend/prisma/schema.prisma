@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id            String         @id @default(uuid())
+  name          String
+  createdAt     DateTime       @default(now())
+  users         User[]
+  cells         Cell[]
+  contributions Contribution[]
+  expenses      Expense[]
+  auditLogs     AuditLog[]
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id             String         @id @default(uuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  name           String
+  email          String         @unique
+  password       String
+  role           Role           @default(MEMBER)
+  createdAt      DateTime       @default(now())
+  contributions  Contribution[]
+}
+
+model Cell {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  budget         Float        @default(0)
+  income         Float        @default(0)
+  icon           String?
+  color          String?
+  expenses       Expense[]
+}
+
+model Contribution {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  amount         Float
+  date           DateTime     @default(now())
+  isPaid         Boolean      @default(true)
+}
+
+model Expense {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  cellId         String
+  cell           Cell         @relation(fields: [cellId], references: [id])
+  title          String
+  amount         Float
+  date           DateTime     @default(now())
+  performedBy    String
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  action         String
+  details        String?
+  performedBy    String
+  timestamp      DateTime     @default(now())
+}
