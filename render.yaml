@@ -13,7 +13,7 @@ services:
           name: srfm-db
           property: connectionString
       - key: JWT_SECRET
-        generate: true
+        value: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 databases:
   - name: srfm-db
     plan: free
