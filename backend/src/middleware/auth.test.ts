@@ -1,5 +1,5 @@
-import { authenticate, isAdmin } from './auth';
-import type { AuthRequest } from './auth';
+import { authenticate, isAdmin } from './auth.js';
+import type { AuthRequest } from './auth.js';
 import type { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 

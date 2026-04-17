@@ -3,12 +3,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
-import authRoutes from './routes/auth';
-import cellRoutes from './routes/cells';
-import expenseRoutes from './routes/expenses';
-import contributionRoutes from './routes/contributions';
-import auditRoutes from './routes/audit';
-import memberRoutes from './routes/members';
+import authRoutes from './routes/auth.js';
+import cellRoutes from './routes/cells.js';
+import expenseRoutes from './routes/expenses.js';
+import contributionRoutes from './routes/contributions.js';
+import auditRoutes from './routes/audit.js';
+import memberRoutes from './routes/members.js';
 
 dotenv.config();
 

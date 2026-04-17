@@ -52,7 +52,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
 
     res.status(201).json(contribution);
   } catch (error) {
-    if (error instanceof z.ZodError) return res.status(400).json({ errors: error.errors });
+    if (error instanceof z.ZodError) return res.status(400).json({ errors: (error as any).errors });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
