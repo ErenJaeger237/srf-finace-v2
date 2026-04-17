@@ -2,14 +2,14 @@ import { Router } from 'express';
 import type { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { AuthRequest, authenticate, isAdmin } from '../middleware/auth';
+import { authenticate, isAdmin, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 const cellSchema = z.object({
   name: z.string().min(2),
-  budget: z.number().min(0),
+  budget: z.number().nonnegative(),
   icon: z.string().optional(),
   color: z.string().optional(),
 });
@@ -43,7 +43,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
     });
     res.status(201).json(cell);
   } catch (error) {
-    if (error instanceof z.ZodError) return res.status(400).json({ error: error.errors });
+    if (error instanceof z.ZodError) return res.status(400).json({ errors: error.errors });
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -2,14 +2,14 @@ import { Router } from 'express';
 import type { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { AuthRequest, authenticate, isAdmin } from '../middleware/auth';
+import { authenticate, isAdmin, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 const expenseSchema = z.object({
   title: z.string().min(2),
-  amount: z.number().pos(),
+  amount: z.number().positive(),
   cellId: z.string().uuid(),
 });
 
@@ -48,7 +48,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
       // 2. Update cell spent amount
       await tx.cell.update({
         where: { id: cellId },
-        data: { budget: { decrement: 0 } }, // In a real app we'd recalculate spent or use a field
+        data: { budget: { decrement: 0 } },
       });
 
       // 3. Create Audit Log
@@ -66,7 +66,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
 
     res.status(201).json(result);
   } catch (error) {
-    if (error instanceof z.ZodError) return res.status(400).json({ error: error.errors });
+    if (error instanceof z.ZodError) return res.status(400).json({ errors: error.errors });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
