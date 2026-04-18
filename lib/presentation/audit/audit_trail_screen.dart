@@ -50,7 +50,15 @@ class AuditTrailScreen extends ConsumerWidget {
                         ),
                         child: IconButton(
                           onPressed: () async {
-                            await ExportService.exportToExcel();
+                            final contributions = ref.read(contributionsProvider).value ?? [];
+                            final expenses = ref.read(expensesProvider).value ?? [];
+                            final cells = ref.read(cellsProvider).value ?? [];
+                            
+                            await ExportService.exportToExcel(
+                              contributions: contributions,
+                              expenses: expenses,
+                              cells: cells,
+                            );
                           },
                           icon: const Icon(Icons.file_download_outlined, color: AppColors.success),
                         ),

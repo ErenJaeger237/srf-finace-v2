@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/app_theme.dart';
-import '../../data/mock_repository.dart';
 import '../components/glass_card.dart';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -27,6 +26,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final expensesAsync = ref.watch(expensesProvider);
     final contributionsAsync = ref.watch(contributionsProvider);
     final userRoleAsync = ref.watch(userRoleProvider);
+    final userNameAsync = ref.watch(currentUserNameProvider);
 
     return Scaffold(
       extendBody: true,
@@ -60,7 +60,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context),
+                    _buildHeader(context, userNameAsync.value ?? 'Manager'),
                     const SizedBox(height: 24),
                     
                     // Main Balance & Summary Grid (Aggregated from live data)
@@ -98,10 +98,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildLiveFinancialOverview(WidgetRef ref) {
     final cells = ref.watch(cellsProvider).value ?? [];
     final contributions = ref.watch(contributionsProvider).value ?? [];
+    final expenses = ref.watch(expensesProvider).value ?? [];
     
     final totalIncome = contributions.fold(0.0, (sum, item) => sum + item.amount) + 
                        cells.fold(0.0, (sum, item) => sum + item.income);
-    final totalExpenses = ref.watch(expensesProvider).value?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
+    final totalExpenses = expenses.fold(0.0, (sum, item) => sum + item.amount);
     final balance = totalIncome - totalExpenses;
 
     return Column(
@@ -115,29 +116,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildRoleSpecificContent(UserRole role, WidgetRef ref) {
     if (role == UserRole.admin) {
+      final cells = ref.watch(cellsProvider).value ?? [];
+      final contributions = ref.watch(contributionsProvider).value ?? [];
+      final totalExpenses = ref.watch(expensesProvider).value?.fold(0.0, (sum, item) => sum + item.amount) ?? 0.0;
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Expense Distribution', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
           const SizedBox(height: 16),
-          _buildPieChart(context, ref.watch(cellsProvider).value ?? []),
+          _buildPieChart(context, cells, totalExpenses),
           const SizedBox(height: 24),
           const Text('Income Comparison by Cell', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
           const SizedBox(height: 16),
-          _buildIncomeBarChart(context, ref.watch(cellsProvider).value ?? []),
+          _buildIncomeBarChart(context, cells),
           const SizedBox(height: 24),
           const Text('Group Contributions', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
           const SizedBox(height: 16),
-          _buildContributionsBarChart(context, ref.watch(contributionsProvider).value ?? []),
+          _buildContributionsBarChart(context, contributions),
         ],
       );
     } else {
+      final contributions = ref.watch(contributionsProvider).value ?? [];
+      final userId = ref.watch(currentUserIdProvider).value;
+      
+      final myTotal = contributions
+          .where((c) => c.userId == userId)
+          .fold(0.0, (sum, item) => sum + item.amount);
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('My Contribution', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
           const SizedBox(height: 16),
-          _buildPersonalContributionCard(context),
+          _buildPersonalContributionCard(context, myTotal),
         ],
       );
     }
@@ -186,23 +198,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       itemBuilder: (context, index) {
         final item = items[index];
         if (item is Contribution) {
-          return _buildTransactionItem(context, title: item.userName, subtitle: 'Contribution', amount: item.amount, isIncome: true, initials: item.userName.substring(0, 1), color: Colors.orange);
+          return _buildTransactionItem(context, title: item.userName, subtitle: 'Contribution', amount: item.amount, isIncome: true, initials: item.userName.isNotEmpty ? item.userName.substring(0, 1) : 'U', color: Colors.orange);
         } else {
-          return _buildTransactionItem(context, title: item.title, subtitle: item.cellName, amount: item.amount, isIncome: false, initials: item.title.substring(0, 1), color: Colors.pink);
+          return _buildTransactionItem(context, title: item.title, subtitle: item.cellName, amount: item.amount, isIncome: false, initials: item.title.isNotEmpty ? item.title.substring(0, 1) : 'E', color: Colors.pink);
         }
       },
     );
   }
 
-  // Refactored helpers for cleaner code
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, String name) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Good Morning, Manager', style: Theme.of(context).textTheme.bodyMedium),
+            Text('Good Day, $name', style: Theme.of(context).textTheme.bodyMedium),
             Text('Financial Overview', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
           ],
         ),
@@ -215,7 +226,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildBalanceCard(BuildContext context) {
+  Widget _buildBalanceCard(BuildContext context, double balance) {
     return GlassCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -228,13 +239,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-                child: const Text('+12.5%', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+                child: const Text('LIVE', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            currencyFormat.format(MockRepository.availableBalance),
+            currencyFormat.format(balance),
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: AppColors.accent),
           ),
           const SizedBox(height: 24),
@@ -250,32 +261,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildSummaryGrid() {
+  Widget _buildSummaryGrid(double income, double expenses) {
     return Row(
       children: [
-        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.account_balance_wallet_outlined, size: 20)), const SizedBox(height: 12), const Text('Total Income', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(MockRepository.totalContributions)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
+        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.account_balance_wallet_outlined, size: 20)), const SizedBox(height: 12), const Text('Total Income', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(income)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
         const SizedBox(width: 16),
-        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.secondary)), const SizedBox(height: 12), const Text('Expenses', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(MockRepository.totalExpenses)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
+        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.secondary)), const SizedBox(height: 12), const Text('Expenses', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(expenses)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
       ],
-    );
-  }
-
-  Widget _buildCellBudgetsList() {
-    return SizedBox(
-      height: 160,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: MockRepository.cells.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          final cell = MockRepository.cells[index];
-          return GlassCard(
-            width: 160,
-            padding: const EdgeInsets.all(16),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(cell.icon, color: cell.color, size: 24), const Spacer(), Text(cell.name, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 8), ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: cell.percentage, backgroundColor: Colors.white10, valueColor: AlwaysStoppedAnimation<Color>(cell.color), minHeight: 6)), const SizedBox(height: 8), Text('${compactFormat.format(cell.spent)} / ${compactFormat.format(cell.budget)}', style: const TextStyle(fontSize: 10, color: AppColors.secondaryText))]),
-          );
-        },
-      ),
     );
   }
 
@@ -289,26 +281,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildTransactionsList() {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: MockRepository.recentContributions.length + MockRepository.recentExpenses.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        if (index < MockRepository.recentContributions.length) {
-          final c = MockRepository.recentContributions[index];
-          return _buildTransactionItem(context, title: c.userName, subtitle: 'Contribution', amount: c.amount, isIncome: true, initials: c.userName.substring(0, 1), color: Colors.orange);
-        } else {
-          final e = MockRepository.recentExpenses[index - MockRepository.recentContributions.length];
-          return _buildTransactionItem(context, title: e.title, subtitle: e.cellName, amount: e.amount, isIncome: false, initials: e.title.substring(0, 1), color: Colors.pink);
-        }
-      },
-    );
-  }
-
-
-  Widget _buildPieChart(BuildContext context) {
+  Widget _buildPieChart(BuildContext context, List<Cell> cells, double totalExpenses) {
+    if (totalExpenses == 0) {
+       return const GlassCard(height: 240, child: Center(child: Text('No expenses recorded', style: TextStyle(color: AppColors.secondaryText))));
+    }
     return GlassCard(
       height: 240,
       padding: const EdgeInsets.all(24),
@@ -320,11 +296,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               PieChartData(
                 sectionsSpace: 4,
                 centerSpaceRadius: 40,
-                sections: MockRepository.cells.map((cell) {
+                sections: cells.map((cell) {
                   return PieChartSectionData(
                     color: cell.color,
                     value: cell.spent,
-                    title: '${(cell.spent / MockRepository.totalExpenses * 100).toInt()}%',
+                    title: cell.spent > 0 ? '${(cell.spent / totalExpenses * 100).toInt()}%' : '',
                     radius: 50,
                     titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
                   );
@@ -337,7 +313,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: MockRepository.cells.map((cell) {
+              children: cells.map((cell) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
@@ -362,7 +338,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildIncomeBarChart(BuildContext context) {
+  Widget _buildIncomeBarChart(BuildContext context, List<Cell> cells) {
     return GlassCard(
       height: 240,
       padding: const EdgeInsets.all(24),
@@ -377,10 +353,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  if (value.toInt() < MockRepository.cells.length) {
+                  if (value.toInt() < cells.length) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(MockRepository.cells[value.toInt()].name.substring(0, 3), style: const TextStyle(fontSize: 10, color: AppColors.secondaryText)),
+                      child: Text(cells[value.toInt()].name.substring(0, 3).toUpperCase(), style: const TextStyle(fontSize: 10, color: AppColors.secondaryText)),
                     );
                   }
                   return const SizedBox();
@@ -389,7 +365,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
           borderData: FlBorderData(show: false),
-          barGroups: MockRepository.cells.asMap().entries.map((entry) {
+          barGroups: cells.asMap().entries.map((entry) {
             return BarChartGroupData(
               x: entry.key,
               barRods: [
@@ -407,7 +383,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildContributionsBarChart(BuildContext context) {
+  Widget _buildContributionsBarChart(BuildContext context, List<Contribution> contributions) {
+    // Group contributions by user
+    final Map<String, double> userTotals = {};
+    for (var c in contributions) {
+      userTotals[c.userName] = (userTotals[c.userName] ?? 0.0) + c.amount;
+    }
+    final sortedNames = userTotals.keys.toList()..sort();
+
     return GlassCard(
       height: 240,
       padding: const EdgeInsets.only(top: 24, bottom: 12, left: 12, right: 12),
@@ -422,31 +405,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  return Text('M${value.toInt() + 1}', style: const TextStyle(fontSize: 9, color: AppColors.secondaryText));
+                  if (value.toInt() < sortedNames.length) {
+                    return Text(sortedNames[value.toInt()].substring(0, 1), style: const TextStyle(fontSize: 9, color: AppColors.secondaryText));
+                  }
+                  return const SizedBox();
                 },
               ),
             ),
           ),
           borderData: FlBorderData(show: false),
-          barGroups: List.generate(14, (i) {
+          barGroups: sortedNames.asMap().entries.map((entry) {
             return BarChartGroupData(
-              x: i,
+              x: entry.key,
               barRods: [
                 BarChartRodData(
-                  toY: i < 12 ? 3000 : 0,
-                  color: i < 12 ? Colors.teal : Colors.orange.withOpacity(0.3),
+                  toY: userTotals[entry.value]!,
+                  color: Colors.teal,
                   width: 12,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                 ),
               ],
             );
-          }),
+          }).toList(),
         ),
       ),
     );
   }
 
-  Widget _buildPersonalContributionCard(BuildContext context) {
+  Widget _buildPersonalContributionCard(BuildContext context, double myTotal) {
     return GlassCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -454,17 +440,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Total Paid', style: TextStyle(color: AppColors.secondaryText, fontSize: 14)),
-                  Text('FCFA 3,000', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: Colors.tealAccent)),
+                  const Text('Total Paid', style: TextStyle(color: AppColors.secondaryText, fontSize: 14)),
+                  Text(currencyFormat.format(myTotal), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: Colors.tealAccent)),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: const Text('STATUS: PAID', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 10)),
+                child: Text(myTotal > 0 ? 'STATUS: ACTIVE' : 'STATUS: PENDING', style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 10)),
               ),
             ],
           ),
@@ -475,7 +461,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Icon(Icons.info_outline, size: 16, color: AppColors.secondaryText),
               SizedBox(width: 8),
-              Expanded(child: Text('Your next contribution is due on May 1st.', style: TextStyle(color: AppColors.secondaryText, fontSize: 12))),
+              Expanded(child: Text('Your contributions help the organization grow.', style: TextStyle(color: AppColors.secondaryText, fontSize: 12))),
             ],
           ),
         ],
@@ -483,60 +469,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-
-  Widget _buildBottomNav() {
+  Widget _buildTransactionItem(BuildContext context, {
+    required String title,
+    required String subtitle,
+    required double amount,
+    required bool isIncome,
+    required String initials,
+    required Color color,
+  }) {
     return GlassCard(
-      borderRadius: 30,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _navItem(0, Icons.grid_view_rounded, 'Dashboard'),
-          _navItem(1, Icons.group_rounded, 'Members'),
-          _navItem(2, Icons.pie_chart_rounded, 'Budgets'),
-          
-          // Special "New Entry" FAB-style button
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
-              ],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.add, color: Colors.white, size: 20),
-                SizedBox(width: 4),
-                Text('New Entry', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ],
-            ),
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            child: Center(child: Text(initials, style: TextStyle(color: color, fontWeight: FontWeight.bold))),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem(int index, IconData icon, String label) {
-    final isSelected = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? AppColors.primary : AppColors.secondaryText,
-            size: 24,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(subtitle, style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+              ],
+            ),
           ),
           Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? AppColors.primary : AppColors.secondaryText,
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+            '${isIncome ? '+' : '-'}${compactFormat.format(amount)}',
+            style: TextStyle(fontWeight: FontWeight.w900, color: isIncome ? Colors.tealAccent : Colors.pinkAccent),
           ),
         ],
       ),

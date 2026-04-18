@@ -48,7 +48,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
       // 2. Update cell spent amount
       await tx.cell.update({
         where: { id: cellId },
-        data: { budget: { decrement: 0 } },
+        data: { spent: { increment: amount } },
       });
 
       // 3. Create Audit Log

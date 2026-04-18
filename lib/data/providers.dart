@@ -28,3 +28,11 @@ final userRoleProvider = FutureProvider<UserRole>((ref) async {
   final role = await ref.watch(apiServiceProvider).storage.read(key: 'user_role');
   return role == 'ADMIN' ? UserRole.admin : UserRole.member;
 });
+
+final currentUserIdProvider = FutureProvider<String?>((ref) async {
+  return ref.watch(apiServiceProvider).storage.read(key: 'user_id');
+});
+
+final currentUserNameProvider = FutureProvider<String?>((ref) async {
+  return ref.watch(apiServiceProvider).storage.read(key: 'user_name');
+});

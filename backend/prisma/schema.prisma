@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -41,6 +41,7 @@ model Cell {
   organization   Organization @relation(fields: [organizationId], references: [id])
   name           String
   budget         Float        @default(0)
+  spent          Float        @default(0)
   income         Float        @default(0)
   icon           String?
   color          String?

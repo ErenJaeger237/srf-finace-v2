@@ -18,6 +18,8 @@ class ApiService {
       final data = jsonDecode(response.body);
       await storage.write(key: 'jwt', value: data['token']);
       await storage.write(key: 'user_role', value: data['user']['role']);
+      await storage.write(key: 'user_id', value: data['user']['id']);
+      await storage.write(key: 'user_name', value: data['user']['name']);
       return data['token'];
     }
     return null;
@@ -104,12 +106,10 @@ class ApiService {
   }
 
   Future<bool> recordIncome(String cellId, double amount) async {
-    // Note: The backend route for updating income might need to be verified
-    // Assuming PATCH /api/cells/:id with income update logic or a specific route
-    final response = await http.patch(
-      Uri.parse('$baseUrl/cells/$cellId'),
+    final response = await http.post(
+      Uri.parse('$baseUrl/cells/$cellId/income'),
       headers: await _getHeaders(),
-      body: jsonEncode({'income': amount}), // Simplification
+      body: jsonEncode({'amount': amount}),
     );
     return response.statusCode == 200;
   }

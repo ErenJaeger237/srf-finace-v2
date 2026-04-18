@@ -48,4 +48,31 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
   }
 });
 
+// Record cell income (Admin Only)
+router.post('/:id/income', authenticate, isAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const { amount } = z.object({ amount: z.number().positive() }).parse(req.body);
+    const { id } = req.params;
+
+    const cell = await prisma.cell.update({
+      where: { id, organizationId: req.user?.organizationId as string },
+      data: { income: { increment: amount } },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        organizationId: req.user?.organizationId as string,
+        action: 'CELL_INCOME_RECORDED',
+        details: `Income of ${amount} recorded for cell ${cell.name}`,
+        performedBy: req.user?.email as string,
+      }
+    });
+
+    res.json(cell);
+  } catch (error) {
+    if (error instanceof z.ZodError) return res.status(400).json({ errors: (error as any).errors });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
