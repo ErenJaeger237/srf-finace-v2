@@ -1,6 +1,6 @@
 # Project Memory: Street Ride Finance Manager (SRFM)
 
-## 📅 Last Updated: April 17, 2026
+## 📅 Last Updated: April 18, 2026
 
 ## ✅ COMPLETED (Frontend - Flutter)
 - **Project Initialization:**
@@ -39,13 +39,12 @@
     - Configured as **ECMAScript Module (ESM)** for modern compatibility.
     - Used **tsx** for reliable development execution.
 - **Database Architecture:**
-    - **Prisma 6.2.1:** Downgraded from v7 to ensure stable datasource URL handling via `.env`.
+    - **Prisma 6.2.1.**
     - **Schema:** Multi-tenant design with `organizationId` on all tables (Organization, User, Cell, Contribution, Expense, AuditLog).
 - **Security & Middleware:**
     - **JWT Authentication:** Implemented `authenticate` middleware with secure `JWT_SECRET`.
     - **RBAC:** Implemented `isAdmin` middleware to restrict write operations to the Finance Manager.
     - **bcrypt:** Password hashing for user security.
-    - **ESM Type Fixes:** Updated all Express imports to `import type { Request, Response }` to resolve runtime syntax errors.
 - **API Endpoints Implemented:**
     - `POST /api/auth/login`: Credential verification and JWT issuance.
     - `GET /api/members`: Multi-tenant listing of organization members.
@@ -54,25 +53,26 @@
     - `GET/POST /api/contributions`: tracking member payments.
     - `GET /api/audit`: Chronological action log retrieval.
 - **Database Seeding:**
-    - Created `prisma/seed.ts`.
+    - Idempotent `prisma/seed.ts` using `upsert`.
     - Auto-generates organization "Street Ride".
-    - Creates Admin: `admin@streetride.org` / `admin123`.
     - Initializes sample Cells: Logistics, Marketing, Security.
 
-## ✅ COMPLETED (Flutter API Integration)
-- [x] **ApiService Implementation:** Full authentication and CRUD coverage for all modules.
-- [x] **Reactive State:** Converted all screens to Riverpod for live data synchronization.
-- [x] **Form Logic:** Connected all bottom-sheets to live API endpoints with loading states.
-- [x] **Data Aggregation:** Dashboard balance and summaries are now calculated from live database records.
+## ✅ COMPLETED (Supabase Deployment)
+- **Database Connection:** Configured to use Supabase Session Pooler for IPv4 compatibility.
+- **Schema Sync:** Synchronized schema with Supabase using `npx prisma db push`.
+- **Infrastructure:**
+    - Dockerized backend with multi-stage build for production.
+    - Updated `USER_MANUAL.md` for end-user guidance.
 
-## ✅ COMPLETED (Unit Testing)
-- [x] **Backend Tests:** Set up Jest/Supertest. Implemented Auth middleware coverage (Token/RBAC).
-- [x] **Frontend Tests:** Built comprehensive domain model parsing tests (User, Cell, Contribution, Expense).
+## ✅ COMPLETED (Flutter Maintenance)
+- **Lint Cleanup:** Removed unused imports, fixed syntax errors, and replaced deprecated Flutter members (e.g., `.withOpacity` -> `.withValues(alpha: ...)`).
+- **Platform Compatibility:** Enabled platform-aware `baseUrl` in `ApiService` for Android Emulator (`10.0.2.2`) vs iOS/Physical devices.
 
 ## 🛠️ NEXT STEPS
-- [ ] **Production Deployment:**
-    - Configure **Render** for Node.js hosting.
-    - Finalize **PlanetScale** production database connection.
+- [ ] **Final Deployment:**
+    - Connect GitHub repo to Render.
+    - Add environment variables (`DATABASE_URL`, `JWT_SECRET`) to Render dashboard.
+    - Verify app functionality after deployment.
 - [ ] **Real-world Testing:**
     - Verify Android 6 performance with full API data.
     - Validate Excel export on physical iOS/Android devices.

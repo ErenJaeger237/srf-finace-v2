@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/app_theme.dart';
-import '../../data/mock_repository.dart';
 import '../components/glass_card.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +62,7 @@ class BudgetsScreen extends ConsumerWidget {
                                     Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: cell.color.withOpacity(0.1),
+                                        color: cell.color.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Icon(cell.icon, color: cell.color, size: 24),
@@ -129,6 +128,4 @@ class BudgetsScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
-import '../../domain/models.dart';
-import '../../data/mock_repository.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
@@ -55,7 +53,7 @@ class _AddContributionFormState extends ConsumerState<AddContributionForm> {
         );
         if (success) {
           ref.invalidate(contributionsProvider);
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         }
         setState(() => _isLoading = false);
       },
@@ -121,7 +119,7 @@ class _RecordExpenseFormState extends ConsumerState<RecordExpenseForm> {
         if (success) {
           ref.invalidate(expensesProvider);
           ref.invalidate(cellsProvider);
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         }
         setState(() => _isLoading = false);
       },
@@ -178,7 +176,7 @@ class _RecordIncomeFormState extends ConsumerState<RecordIncomeForm> {
         );
         if (success) {
           ref.invalidate(cellsProvider);
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         }
         setState(() => _isLoading = false);
       },
@@ -228,7 +226,7 @@ class _CreateCellFormState extends ConsumerState<CreateCellForm> {
         );
         if (success) {
           ref.invalidate(cellsProvider);
-          if (mounted) Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         }
         setState(() => _isLoading = false);
       },
@@ -275,7 +273,7 @@ class _BaseFormLayout extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 20),
               ),
               const SizedBox(width: 12),
@@ -312,7 +310,7 @@ Widget _buildTextField({
       Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
       const SizedBox(height: 8),
       Container(
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
         child: TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -342,7 +340,7 @@ Widget _buildDropdown<T>({
       const SizedBox(height: 8),
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<T>(
             value: value,

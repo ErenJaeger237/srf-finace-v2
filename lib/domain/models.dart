@@ -87,8 +87,8 @@ class Cell {
       organizationId: json['organizationId'],
       name: json['name'],
       budget: (json['budget'] as num).toDouble(),
-      spent: (json['spent'] ?? 0.0 as num).toDouble(),
-      income: (json['income'] ?? 0.0 as num).toDouble(),
+      spent: (json['spent'] as num? ?? 0.0).toDouble(),
+      income: (json['income'] as num? ?? 0.0).toDouble(),
       icon: _getIconData(json['icon']),
       color: _getColor(json['color']),
     );
@@ -105,7 +105,11 @@ class Cell {
 
   static Color _getColor(String? hex) {
     if (hex == null) return Colors.blue;
-    return Color(int.parse(hex.replaceFirst('#', 'FF'), radix: 16));
+    try {
+      return Color(int.parse(hex.replaceFirst('#', 'FF'), radix: 16));
+    } catch (e) {
+      return Colors.blue;
+    }
   }
 
   double get remaining => budget - spent;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_theme.dart';
 import '../components/glass_card.dart';
 import '../auth/login_screen.dart';
@@ -103,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               width: 200,
                               height: 200,
                               decoration: BoxDecoration(
-                                color: step.color.withOpacity(0.1),
+                                color: step.color.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(step.icon, size: 100, color: step.color),
@@ -111,7 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             const SizedBox(height: 60),
                             Text(
                               step.title,
-                              textAlign: Center,
+                              textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -119,7 +120,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             const SizedBox(height: 16),
                             Text(
                               step.description,
-                              textAlign: Center,
+                              textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     color: AppColors.secondaryText,
                                   ),
@@ -203,7 +204,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('show_onboarding', false);
     
-    if (!mounted) return;
+    if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
     );

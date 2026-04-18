@@ -41,7 +41,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -219,7 +219,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle, border: Border.all(color: AppColors.glassBorder)),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), shape: BoxShape.circle, border: Border.all(color: AppColors.glassBorder)),
           child: const Icon(Icons.notifications_outlined, size: 24),
         ),
       ],
@@ -238,7 +238,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const Text('Available Balance', style: TextStyle(color: AppColors.secondaryText, fontWeight: FontWeight.w600)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                 child: const Text('LIVE', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ],
@@ -264,9 +264,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildSummaryGrid(double income, double expenses) {
     return Row(
       children: [
-        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.account_balance_wallet_outlined, size: 20)), const SizedBox(height: 12), const Text('Total Income', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(income)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
+        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.account_balance_wallet_outlined, size: 20)), const SizedBox(height: 12), const Text('Total Income', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(income)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
         const SizedBox(width: 16),
-        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.secondary)), const SizedBox(height: 12), const Text('Expenses', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(expenses)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
+        Expanded(child: GlassCard(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColors.secondary)), const SizedBox(height: 12), const Text('Expenses', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)), Text('FCFA ${compactFormat.format(expenses)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]))),
       ],
     );
   }
@@ -449,7 +449,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: Text(myTotal > 0 ? 'STATUS: ACTIVE' : 'STATUS: PENDING', style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 10)),
               ),
             ],
@@ -484,7 +484,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Center(child: Text(initials, style: TextStyle(color: color, fontWeight: FontWeight.bold))),
           ),
           const SizedBox(width: 16),

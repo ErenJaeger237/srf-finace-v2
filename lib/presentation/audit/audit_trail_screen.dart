@@ -44,9 +44,9 @@ class AuditTrailScreen extends ConsumerWidget {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.1),
+                          color: AppColors.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.success.withOpacity(0.2)),
+                          border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
                         ),
                         child: IconButton(
                           onPressed: () async {
@@ -102,7 +102,7 @@ class AuditTrailScreen extends ConsumerWidget {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: (isExpense ? Colors.pink : Colors.teal).withOpacity(0.1),
+                                    color: (isExpense ? Colors.pink : Colors.teal).withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -166,7 +166,7 @@ class AuditTrailScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : Colors.white.withOpacity(0.05),
+        color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: isSelected ? AppColors.primary : AppColors.glassBorder),
       ),

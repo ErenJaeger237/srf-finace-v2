@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
-import '../../data/mock_repository.dart';
 import '../components/glass_card.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +45,7 @@ class MembersScreen extends ConsumerWidget {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                                   child: Text(
                                     member.name.substring(0, 1),
                                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
@@ -71,7 +70,7 @@ class MembersScreen extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.teal.withOpacity(0.1),
+                                    color: Colors.teal.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(

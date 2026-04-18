@@ -1,10 +1,18 @@
+import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../domain/models.dart';
 
 class ApiService {
-  final String baseUrl = 'http://localhost:3000/api';
+  // Use 10.0.2.2 for Android Emulator, 127.0.0.1 for iOS/Physical devices
+  // Replace YOUR_LOCAL_IP with your computer's actual IP if testing on physical devices
+  static String get _baseUrl {
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
+    return 'http://127.0.0.1:3000/api';
+  }
+
+  final String baseUrl = _baseUrl;
   final storage = const FlutterSecureStorage();
 
   Future<String?> login(String email, String password) async {
