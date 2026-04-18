@@ -52,7 +52,7 @@ router.post('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) 
 router.post('/:id/income', authenticate, isAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { amount } = z.object({ amount: z.number().positive() }).parse(req.body);
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const cell = await prisma.cell.update({
       where: { id, organizationId: req.user?.organizationId as string },
