@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 export interface AuthRequest extends Request {
   user?: {
-    id: String;
+    id: string;
     email: string;
     role: 'ADMIN' | 'MEMBER';
     organizationId: string;
