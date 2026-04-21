@@ -151,6 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pop(context);
               _showForm(context, const CreateCellForm());
             }),
+            const SizedBox(height: 16),
+            _actionTile(Icons.person_add_alt_1_rounded, 'Onboard New Member', Colors.indigoAccent, () {
+              Navigator.pop(context);
+              _showForm(context, const CreateMemberForm());
+            }),
             const SizedBox(height: 32),
           ],
         ),

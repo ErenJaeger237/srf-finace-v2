@@ -286,6 +286,77 @@ class _CreateCellFormState extends ConsumerState<CreateCellForm> {
   }
 }
 
+class CreateMemberForm extends ConsumerStatefulWidget {
+  const CreateMemberForm({super.key});
+
+  @override
+  ConsumerState<CreateMemberForm> createState() => _CreateMemberFormState();
+}
+
+class _CreateMemberFormState extends ConsumerState<CreateMemberForm> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return _BaseFormLayout(
+      title: 'Onboard New Member',
+      icon: Icons.person_add_alt_1_rounded,
+      color: Colors.indigoAccent,
+      isLoading: _isLoading,
+      children: [
+        _buildTextField(
+          controller: nameController,
+          label: 'Full Name',
+          hint: 'e.g. John Doe',
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: emailController,
+          label: 'Email Address',
+          hint: 'john@streetride.org',
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: passwordController,
+          label: 'Initial Access Key (Password)',
+          hint: 'Set a temporary key',
+        ),
+      ],
+      onSave: () async {
+        if (nameController.text.isEmpty || emailController.text.isEmpty || passwordController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill in all fields')));
+          return;
+        }
+        setState(() => _isLoading = true);
+        try {
+          final success = await ref.read(apiServiceProvider).createMember(
+            nameController.text,
+            emailController.text,
+            passwordController.text,
+          );
+          if (success) {
+            ref.invalidate(membersProvider);
+            if (context.mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Member onboarded successfully')));
+            }
+          } else {
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to onboard member. Email taken?')));
+          }
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
+      },
+    );
+  }
+}
+
 // Internal Helper Components
 class _BaseFormLayout extends StatelessWidget {
   final String title;

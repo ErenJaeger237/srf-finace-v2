@@ -50,15 +50,27 @@ class AuditTrailScreen extends ConsumerWidget {
                         ),
                         child: IconButton(
                           onPressed: () async {
-                            final contributions = ref.read(contributionsProvider).value ?? [];
-                            final expenses = ref.read(expensesProvider).value ?? [];
-                            final cells = ref.read(cellsProvider).value ?? [];
-                            
-                            await ExportService.exportToExcel(
-                              contributions: contributions,
-                              expenses: expenses,
-                              cells: cells,
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Generating Excel report...')),
                             );
+                            try {
+                              final contributions = ref.read(contributionsProvider).value ?? [];
+                              final expenses = ref.read(expensesProvider).value ?? [];
+                              final cells = ref.read(cellsProvider).value ?? [];
+                              
+                              if (contributions.isEmpty && expenses.isEmpty) {
+                                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No data available to export')));
+                                return;
+                              }
+
+                              await ExportService.exportToExcel(
+                                contributions: contributions,
+                                expenses: expenses,
+                                cells: cells,
+                              );
+                            } catch (e) {
+                              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+                            }
                           },
                           icon: const Icon(Icons.file_download_outlined, color: AppColors.success),
                         ),
@@ -86,71 +98,87 @@ class AuditTrailScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   
                   auditLogsAsync.when(
-                    data: (logs) => Expanded(
-                      child: ListView.separated(
-                        itemCount: logs.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final log = logs[index];
-                          final isExpense = log['action'] == 'EXPENSE_RECORDED';
-                          return GlassCard(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    data: (logs) {
+                      if (logs.isEmpty) {
+                        return const Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: (isExpense ? Colors.pink : Colors.teal).withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    isExpense ? Icons.remove_circle_outline : Icons.add_circle_outline,
-                                    color: isExpense ? Colors.pink : Colors.teal,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        log['action'].toString().replaceAll('_', ' '),
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        log['details'] ?? '',
-                                        style: const TextStyle(color: AppColors.secondaryText, fontSize: 12),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.person_outline, size: 12, color: Colors.white38),
-                                          const SizedBox(width: 4),
-                                          Text(log['performedBy'] ?? 'Unknown', style: const TextStyle(fontSize: 10, color: Colors.white38)),
-                                          const SizedBox(width: 12),
-                                          const Icon(Icons.access_time, size: 12, color: Colors.white38),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            DateFormat('MMM dd, HH:mm').format(DateTime.parse(log['timestamp'])),
-                                            style: const TextStyle(fontSize: 10, color: Colors.white38),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                Icon(Icons.history_rounded, size: 48, color: Colors.white10),
+                                SizedBox(height: 16),
+                                Text('No activity logs found.', style: TextStyle(color: AppColors.secondaryText)),
                               ],
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
+                        );
+                      }
+                      return Expanded(
+                        child: ListView.separated(
+                          itemCount: logs.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final log = logs[index];
+                            final isExpense = log['action'] == 'EXPENSE_RECORDED';
+                            return GlassCard(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: (isExpense ? Colors.pink : Colors.teal).withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      isExpense ? Icons.remove_circle_outline : Icons.add_circle_outline,
+                                      color: isExpense ? Colors.pink : Colors.teal,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          log['action'].toString().replaceAll('_', ' '),
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          log['details'] ?? '',
+                                          style: const TextStyle(color: AppColors.secondaryText, fontSize: 12),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.person_outline, size: 12, color: Colors.white38),
+                                            const SizedBox(width: 4),
+                                            Text(log['performedBy'] ?? 'Unknown', style: const TextStyle(fontSize: 10, color: Colors.white38)),
+                                            const SizedBox(width: 12),
+                                            const Icon(Icons.access_time, size: 12, color: Colors.white38),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              DateFormat('MMM dd, HH:mm').format(DateTime.parse(log['timestamp'])),
+                                              style: const TextStyle(fontSize: 10, color: Colors.white38),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                     loading: () => const Expanded(child: Center(child: CircularProgressIndicator())),
-                    error: (e, _) => Text('Error loading audit trail: $e'),
+                    error: (e, _) => Expanded(child: Center(child: Text('Error loading audit trail: $e'))),
                   ),
                   const SizedBox(height: 80),
                 ],

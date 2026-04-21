@@ -147,30 +147,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildLiveCellBudgets(AsyncValue<List<Cell>> cellsAsync) {
     return cellsAsync.when(
-      data: (cells) => SizedBox(
-        height: 160,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: cells.length,
-          separatorBuilder: (context, index) => const SizedBox(width: 16),
-          itemBuilder: (context, index) {
-            final cell = cells[index];
-            return GlassCard(
-              width: 160,
-              padding: const EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Icon(cell.icon, color: cell.color, size: 24),
-                const Spacer(),
-                Text(cell.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: cell.percentage, backgroundColor: Colors.white10, valueColor: AlwaysStoppedAnimation<Color>(cell.color), minHeight: 6)),
-                const SizedBox(height: 8),
-                Text('${compactFormat.format(cell.spent)} / ${compactFormat.format(cell.budget)}', style: const TextStyle(fontSize: 10, color: AppColors.secondaryText))
-              ]),
-            );
-          },
-        ),
-      ),
+      data: (cells) {
+        if (cells.isEmpty) {
+          return const SizedBox(
+            height: 160,
+            child: Center(
+              child: Text('No cells created yet.', style: TextStyle(color: AppColors.secondaryText)),
+            ),
+          );
+        }
+        return SizedBox(
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: cells.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final cell = cells[index];
+              return GlassCard(
+                width: 160,
+                padding: const EdgeInsets.all(16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Icon(cell.icon, color: cell.color, size: 24),
+                  const Spacer(),
+                  Text(cell.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ClipRRect(borderRadius: BorderRadius.circular(4), child: LinearProgressIndicator(value: cell.percentage, backgroundColor: Colors.white10, valueColor: AlwaysStoppedAnimation<Color>(cell.color), minHeight: 6)),
+                  const SizedBox(height: 8),
+                  Text('${compactFormat.format(cell.spent)} / ${compactFormat.format(cell.budget)}', style: const TextStyle(fontSize: 10, color: AppColors.secondaryText))
+                ]),
+              );
+            },
+          ),
+        );
+      },
       loading: () => const SizedBox(height: 160, child: Center(child: CircularProgressIndicator())),
       error: (e, _) => Text('Error: $e'),
     );
@@ -178,6 +188,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildLiveTransactionsList(AsyncValue<List<Expense>> expenses, AsyncValue<List<Contribution>> contributions) {
     final List<dynamic> items = [...(expenses.value ?? []), ...(contributions.value ?? [])];
+    if (items.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 32),
+        child: Center(child: Text('No recent transactions.', style: TextStyle(color: AppColors.secondaryText))),
+      );
+    }
     items.sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.separated(

@@ -162,4 +162,19 @@ class ApiService {
     debugPrint('ApiService: Record Income Response ${response.statusCode}: ${response.body}');
     return response.statusCode == 200;
   }
+
+  Future<bool> createMember(String name, String email, String password) async {
+    debugPrint('ApiService: Creating Member: $name');
+    final response = await http.post(
+      Uri.parse('$baseUrl/members'),
+      headers: await _getHeaders(),
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+      }),
+    );
+    debugPrint('ApiService: Create Member Response ${response.statusCode}: ${response.body}');
+    return response.statusCode == 201;
+  }
 }
