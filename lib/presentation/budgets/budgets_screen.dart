@@ -49,7 +49,7 @@ class BudgetsScreen extends ConsumerWidget {
                     data: (cells) => Expanded(
                       child: ListView.separated(
                         itemCount: cells.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        separatorBuilder: (context, index) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final cell = cells[index];
                           return GlassCard(

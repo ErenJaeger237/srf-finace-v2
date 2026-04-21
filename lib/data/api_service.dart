@@ -1,14 +1,17 @@
-import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../domain/models.dart';
 
 class ApiService {
-  // Use 10.0.2.2 for Android Emulator, 127.0.0.1 for iOS/Physical devices
-  // Replace YOUR_LOCAL_IP with your computer's actual IP if testing on physical devices
+  // Production URL: https://srf-finace-v2-1.onrender.com/api
   static String get _baseUrl {
-    if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
+    if (kReleaseMode) return 'https://srf-finace-v2-1.onrender.com/api';
+    
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:3000/api';
+    }
     return 'http://127.0.0.1:3000/api';
   }
 
@@ -42,83 +45,121 @@ class ApiService {
   }
 
   Future<List<Cell>> getCells() async {
-    final response = await http.get(Uri.parse('$baseUrl/cells'), headers: await _getHeaders());
-    if (response.statusCode == 200) {
-      List data = jsonDecode(response.body);
-      return data.map((c) => Cell.fromJson(c)).toList();
+    debugPrint('ApiService: Fetching Cells...');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/cells'), headers: await _getHeaders());
+      debugPrint('ApiService: Cells Response ${response.statusCode}: ${response.body}');
+      if (response.statusCode == 200) {
+        List data = jsonDecode(response.body);
+        return data.map((c) => Cell.fromJson(c)).toList();
+      }
+    } catch (e) {
+      debugPrint('ApiService: Fetch Cells Error: $e');
     }
     return [];
   }
 
   Future<List<Contribution>> getContributions() async {
-    final response = await http.get(Uri.parse('$baseUrl/contributions'), headers: await _getHeaders());
-    if (response.statusCode == 200) {
-      List data = jsonDecode(response.body);
-      return data.map((c) => Contribution.fromJson(c)).toList();
+    debugPrint('ApiService: Fetching Contributions...');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/contributions'), headers: await _getHeaders());
+      debugPrint('ApiService: Contributions Response ${response.statusCode}: ${response.body}');
+      if (response.statusCode == 200) {
+        List data = jsonDecode(response.body);
+        return data.map((c) => Contribution.fromJson(c)).toList();
+      }
+    } catch (e) {
+      debugPrint('ApiService: Fetch Contributions Error: $e');
     }
     return [];
   }
 
   Future<List<Expense>> getExpenses() async {
-    final response = await http.get(Uri.parse('$baseUrl/expenses'), headers: await _getHeaders());
-    if (response.statusCode == 200) {
-      List data = jsonDecode(response.body);
-      return data.map((e) => Expense.fromJson(e)).toList();
+    debugPrint('ApiService: Fetching Expenses...');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/expenses'), headers: await _getHeaders());
+      debugPrint('ApiService: Expenses Response ${response.statusCode}: ${response.body}');
+      if (response.statusCode == 200) {
+        List data = jsonDecode(response.body);
+        return data.map((e) => Expense.fromJson(e)).toList();
+      }
+    } catch (e) {
+      debugPrint('ApiService: Fetch Expenses Error: $e');
     }
     return [];
   }
 
   Future<List<User>> getMembers() async {
-    final response = await http.get(Uri.parse('$baseUrl/members'), headers: await _getHeaders());
-    if (response.statusCode == 200) {
-      List data = jsonDecode(response.body);
-      return data.map((u) => User.fromJson(u)).toList();
+    debugPrint('ApiService: Fetching Members...');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/members'), headers: await _getHeaders());
+      debugPrint('ApiService: Members Response ${response.statusCode}: ${response.body}');
+      if (response.statusCode == 200) {
+        List data = jsonDecode(response.body);
+        return data.map((u) => User.fromJson(u)).toList();
+      }
+    } catch (e) {
+      debugPrint('ApiService: Fetch Members Error: $e');
     }
     return [];
   }
 
   Future<List<Map<String, dynamic>>> getAuditLogs() async {
-    final response = await http.get(Uri.parse('$baseUrl/audit'), headers: await _getHeaders());
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    debugPrint('ApiService: Fetching Audit Logs...');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/audit'), headers: await _getHeaders());
+      debugPrint('ApiService: Audit Response ${response.statusCode}: ${response.body}');
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      debugPrint('ApiService: Fetch Audit Error: $e');
     }
     return [];
   }
 
   // POST / Actions
   Future<bool> addContribution(String userId, double amount) async {
+    debugPrint('ApiService: Adding Contribution for $userId: $amount');
     final response = await http.post(
       Uri.parse('$baseUrl/contributions'),
       headers: await _getHeaders(),
       body: jsonEncode({'userId': userId, 'amount': amount}),
     );
+    debugPrint('ApiService: Add Contribution Response ${response.statusCode}: ${response.body}');
     return response.statusCode == 201;
   }
 
   Future<bool> recordExpense(String title, double amount, String cellId) async {
+    debugPrint('ApiService: Recording Expense for $cellId: $title - $amount');
     final response = await http.post(
       Uri.parse('$baseUrl/expenses'),
       headers: await _getHeaders(),
       body: jsonEncode({'title': title, 'amount': amount, 'cellId': cellId}),
     );
+    debugPrint('ApiService: Record Expense Response ${response.statusCode}: ${response.body}');
     return response.statusCode == 201;
   }
 
   Future<bool> createCell(String name, double budget) async {
+    debugPrint('ApiService: Creating Cell: $name - $budget');
     final response = await http.post(
       Uri.parse('$baseUrl/cells'),
       headers: await _getHeaders(),
       body: jsonEncode({'name': name, 'budget': budget}),
     );
+    debugPrint('ApiService: Create Cell Response ${response.statusCode}: ${response.body}');
     return response.statusCode == 201;
   }
 
   Future<bool> recordIncome(String cellId, double amount) async {
+    debugPrint('ApiService: Recording Income for $cellId: $amount');
     final response = await http.post(
       Uri.parse('$baseUrl/cells/$cellId/income'),
       headers: await _getHeaders(),
       body: jsonEncode({'amount': amount}),
     );
+    debugPrint('ApiService: Record Income Response ${response.statusCode}: ${response.body}');
     return response.statusCode == 200;
   }
 }

@@ -92,40 +92,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     controller: _pageController,
                     onPageChanged: (index) => setState(() => _currentPage = index),
                     itemCount: _steps.length,
-                    itemBuilder: (context, index) {
+                      itemBuilder: (context, index) {
                       final step = _steps[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Icon/Animation Placeholder
-                            Container(
-                              width: 200,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                color: step.color.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
+                      return SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Icon/Animation Placeholder
+                              Container(
+                                width: 200,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  color: step.color.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(step.icon, size: 100, color: step.color),
                               ),
-                              child: Icon(step.icon, size: 100, color: step.color),
-                            ),
-                            const SizedBox(height: 60),
-                            Text(
-                              step.title,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              step.description,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: AppColors.secondaryText,
-                                  ),
-                            ),
-                          ],
+                              const SizedBox(height: 60),
+                              Text(
+                                step.title,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                step.description,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: AppColors.secondaryText,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

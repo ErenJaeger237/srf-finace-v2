@@ -28,18 +28,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: SafeArea(child: _buildBottomNav()),
     );
   }
 
   Widget _buildBottomNav() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
       child: GlassCard(
         borderRadius: 30,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

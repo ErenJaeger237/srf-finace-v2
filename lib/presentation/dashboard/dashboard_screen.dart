@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../core/app_theme.dart';
-import '../components/glass_card.dart';
-
 import 'package:fl_chart/fl_chart.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/app_theme.dart';
 import '../../data/providers.dart';
 import '../../domain/models.dart';
+import '../components/glass_card.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -32,7 +31,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       extendBody: true,
       body: Stack(
         children: [
-          // Background Gradient Glows
           Positioned(
             top: -50,
             right: -50,
@@ -62,28 +60,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   children: [
                     _buildHeader(context, userNameAsync.value ?? 'Manager'),
                     const SizedBox(height: 24),
-                    
-                    // Main Balance & Summary Grid (Aggregated from live data)
                     _buildLiveFinancialOverview(ref),
-                    
                     const SizedBox(height: 24),
-
-                    // Role-Based Visualization
                     userRoleAsync.when(
                       data: (role) => _buildRoleSpecificContent(role, ref),
                       loading: () => const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Text('Error: $e'),
                     ),
-
                     const SizedBox(height: 24),
                     const Text('Cell Budgets', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
                     const SizedBox(height: 16),
                     _buildLiveCellBudgets(cellsAsync),
-                    
                     const SizedBox(height: 24),
                     _buildRecentTransactionsHeader(),
                     _buildLiveTransactionsList(expensesAsync, contributionsAsync),
-                    
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -162,7 +152,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: cells.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 16),
+          separatorBuilder: (context, index) => const SizedBox(width: 16),
           itemBuilder: (context, index) {
             final cell = cells[index];
             return GlassCard(
@@ -194,7 +184,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: items.length.clamp(0, 5),
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = items[index];
         if (item is Contribution) {
@@ -384,7 +374,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildContributionsBarChart(BuildContext context, List<Contribution> contributions) {
-    // Group contributions by user
     final Map<String, double> userTotals = {};
     for (var c in contributions) {
       userTotals[c.userName] = (userTotals[c.userName] ?? 0.0) + c.amount;

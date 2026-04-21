@@ -42,6 +42,7 @@ class ExportService {
       ..createSync(recursive: true)
       ..writeAsBytesSync(fileBytes!);
 
+    // ignore: deprecated_member_use
     await Share.shareXFiles([XFile(file.path)], text: 'SRFM Financial Report');
   }
 }

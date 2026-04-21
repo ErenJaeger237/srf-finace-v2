@@ -31,7 +31,7 @@ void main() {
       final cell = Cell.fromJson(json);
       expect(cell.name, 'Logistics');
       expect(cell.remaining, 4000.0);
-      expect(cell.color.value, const Color(0xFFFF4500).value);
+      expect(cell.color, const Color(0xFFFF4500));
     });
 
     test('Contribution.fromJson should parse correctly', () {

@@ -37,7 +37,7 @@ class MembersScreen extends ConsumerWidget {
                     data: (members) => Expanded(
                       child: ListView.separated(
                         itemCount: members.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final member = members[index];
                           return GlassCard(
@@ -100,28 +100,4 @@ class MembersScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildMiniStat(String label, String value, Color color) {
-    return Expanded(
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
-            const Spacer(),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-extension on EdgeInsets {
-  static EdgeInsets top(double value) => EdgeInsets.only(top: value);
 }

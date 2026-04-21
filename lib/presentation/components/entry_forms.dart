@@ -45,17 +45,30 @@ class _AddContributionFormState extends ConsumerState<AddContributionForm> {
         ),
       ],
       onSave: () async {
-        if (selectedMemberId == null || amountController.text.isEmpty) return;
-        setState(() => _isLoading = true);
-        final success = await ref.read(apiServiceProvider).addContribution(
-          selectedMemberId!,
-          double.parse(amountController.text),
-        );
-        if (success) {
-          ref.invalidate(contributionsProvider);
-          if (context.mounted) Navigator.pop(context);
+        if (selectedMemberId == null || amountController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a member and enter an amount')));
+          return;
         }
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = true);
+        try {
+          final success = await ref.read(apiServiceProvider).addContribution(
+            selectedMemberId!,
+            double.parse(amountController.text),
+          );
+          if (success) {
+            ref.invalidate(contributionsProvider);
+            if (context.mounted) {
+               Navigator.pop(context);
+               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contribution added successfully')));
+            }
+          } else {
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add contribution. Check permissions.')));
+          }
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
       },
     );
   }
@@ -109,19 +122,32 @@ class _RecordExpenseFormState extends ConsumerState<RecordExpenseForm> {
         ),
       ],
       onSave: () async {
-        if (selectedCellId == null || titleController.text.isEmpty || amountController.text.isEmpty) return;
-        setState(() => _isLoading = true);
-        final success = await ref.read(apiServiceProvider).recordExpense(
-          titleController.text,
-          double.parse(amountController.text),
-          selectedCellId!,
-        );
-        if (success) {
-          ref.invalidate(expensesProvider);
-          ref.invalidate(cellsProvider);
-          if (context.mounted) Navigator.pop(context);
+        if (selectedCellId == null || titleController.text.isEmpty || amountController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill in all fields')));
+          return;
         }
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = true);
+        try {
+          final success = await ref.read(apiServiceProvider).recordExpense(
+            titleController.text,
+            double.parse(amountController.text),
+            selectedCellId!,
+          );
+          if (success) {
+            ref.invalidate(expensesProvider);
+            ref.invalidate(cellsProvider);
+            if (context.mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense recorded successfully')));
+            }
+          } else {
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to record expense')));
+          }
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
       },
     );
   }
@@ -168,17 +194,30 @@ class _RecordIncomeFormState extends ConsumerState<RecordIncomeForm> {
         ),
       ],
       onSave: () async {
-        if (selectedCellId == null || amountController.text.isEmpty) return;
-        setState(() => _isLoading = true);
-        final success = await ref.read(apiServiceProvider).recordIncome(
-          selectedCellId!,
-          double.parse(amountController.text),
-        );
-        if (success) {
-          ref.invalidate(cellsProvider);
-          if (context.mounted) Navigator.pop(context);
+        if (selectedCellId == null || amountController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a cell and enter an amount')));
+          return;
         }
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = true);
+        try {
+          final success = await ref.read(apiServiceProvider).recordIncome(
+            selectedCellId!,
+            double.parse(amountController.text),
+          );
+          if (success) {
+            ref.invalidate(cellsProvider);
+            if (context.mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Income recorded successfully')));
+            }
+          } else {
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to record income')));
+          }
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
       },
     );
   }
@@ -218,17 +257,30 @@ class _CreateCellFormState extends ConsumerState<CreateCellForm> {
         ),
       ],
       onSave: () async {
-        if (nameController.text.isEmpty || budgetController.text.isEmpty) return;
-        setState(() => _isLoading = true);
-        final success = await ref.read(apiServiceProvider).createCell(
-          nameController.text,
-          double.parse(budgetController.text),
-        );
-        if (success) {
-          ref.invalidate(cellsProvider);
-          if (context.mounted) Navigator.pop(context);
+        if (nameController.text.isEmpty || budgetController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a name and budget')));
+          return;
         }
-        setState(() => _isLoading = false);
+        setState(() => _isLoading = true);
+        try {
+          final success = await ref.read(apiServiceProvider).createCell(
+            nameController.text,
+            double.parse(budgetController.text),
+          );
+          if (success) {
+            ref.invalidate(cellsProvider);
+            if (context.mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('New cell created successfully')));
+            }
+          } else {
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create cell. Admin only?')));
+          }
+        } catch (e) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
       },
     );
   }
